@@ -1,0 +1,19 @@
+{
+  "_#" : "parameter file for openbadger",
+
+  "OES" : "1",
+  "manufacturer" : "inid-readers.com",
+
+     "verbosity" : "9",
+
+           "UID" : "0466466A8C3F80",
+    "credential" : "00000003",
+      "facility" : "0000007B",
+         "OCPSK" : "C0C1C2C3C4C5C6C7C8C9CACBCCCDCECF",
+  "cred_version" : "0",
+        "format" : "2",
+          "PICC" : "00",
+
+  "_#" : "that a that a that a that's all, folks!!!"
+}
+

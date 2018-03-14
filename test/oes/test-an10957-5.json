@@ -1,0 +1,17 @@
+{
+  "_#" : "parameters for AN10957 Section 4 Example",
+
+     "verbosity" : "9",
+
+           "UID" : "04DEADBEEFFEED",
+    "credential" : "0000000000065530",
+      "facility" : "0000001122",
+     "cust_data" : "0011223344556677889900112233445566778899",
+         "OCPSK" : "F3F9377698707B688EAF84ABE39E3791",
+  "cred_version" : "0",
+        "format" : "2",
+          "PICC" : "00",
+
+  "_#" : "that a that a that a that's all, folks!!!"
+}
+

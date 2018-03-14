@@ -1,0 +1,12 @@
+#!/bin/bash
+set -x
+./write-chuid --help >write-chuid_help.txt
+
+./write-chuid --loglevel=3 --out 1 \
+  --agency=9999 \
+  --oi=9876 \
+  --credential=000001 --system=9999 --cs 1 --ici 1 \
+  --pi=1000000001 --oc=3 --poa=6 
+ls -l 1 stderr
+
+

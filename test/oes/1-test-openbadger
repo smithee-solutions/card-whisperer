@@ -1,0 +1,16 @@
+#!/bin/bash
+CWPATH=/opt/tester/bin
+echo >oes.log OES ACDO Calculation Test
+echo >>oes.log "-------- --------"
+echo >>oes.log --- AN-10957 Example
+${CWPATH}/create-OES-contents 2>>oes.log
+echo >>oes.log "-------- --------"
+echo >>oes.log "--- INID Example (C0... key)"
+${CWPATH}/create-OES-contents inid-c0.json 2>>oes.log
+echo >>oes.log "-------- --------"
+echo >>oes.log "--- INID Example (D0... key)"
+${CWPATH}/create-OES-contents inid-d0.json 2>>oes.log
+
+echo >>oes.log "--- verbosity 3"
+${CWPATH}/create-OES-contents 2>>oes.log inid-C0key-verb3.json
+

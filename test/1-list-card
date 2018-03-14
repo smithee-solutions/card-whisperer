@@ -1,0 +1,43 @@
+#!/bin/bash
+set -x
+#  Copyright 2016-2017 Smithee, Spelvin, Agnew & Plinge, Inc.
+#
+#  Licensed under the Apache License, Version 2.0 (the "License");
+#  you may not use this file except in compliance with the License.
+#  You may obtain a copy of the License at
+#
+#      http://www.apache.org/licenses/LICENSE-2.0
+#
+#  Unless required by applicable law or agreed to in writing, software
+#  distributed under the License is distributed on an "AS IS" BASIS,
+#  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+#  See the License for the specific language governing permissions and
+#  limitations under the License.
+
+rm -fv *bin *hex *pem *log list_card.tgz
+echo "---list chuid with lscard" >>card_dump.log
+../src/lscard --chuid 2>>card_dump.log
+../src/lscard --alldata >stdout 2>stderr
+openssl x509 -inform DER \
+  -in card_auth_cert.bin -outform PEM -out card_auth_cert.pem
+openssl x509 -inform DER \
+  -in piv_auth_cert.bin -outform PEM -out piv_auth_cert.pem
+openssl pkcs7 -inform DER \
+  -in chuid_asym_sig_pkcs7.bin -print_certs >chuid_signer_cert.pem
+echo "---list chuid signer cert with certtool" >>card_dump.log
+certtool --infile chuid_signer_cert.pem --certificate_info >>card_dump.log
+echo "---list chuid signer cert with list_cert" >>card_dump.log
+list_cert chuid_signer_cert.pem >>card_dump.log
+echo "---list Card Auth Cert with certtool" >>card_dump.log
+certtool --inder --infile card_auth_cert.bin --certificate_info >>card_dump.log
+echo "---list Card Auth Cert with list_cert" >>card_dump.log
+list_cert card_auth_cert.pem >>card_dump.log
+echo "---list PIV Auth Cert with certtool" >>card_dump.log
+certtool --inder --infile piv_auth_cert.bin --certificate_info >>card_dump.log
+echo "---list PIV Auth Cert with list_cert" >>card_dump.log
+list_cert piv_auth_cert.pem >>card_dump.log
+tar czvf list_card.tgz \
+  card_auth_cert.bin card_chuid.bin chuid_asym_sig_pkcs7.bin chuid_signer_cert.pem \
+  piv_auth_cert.bin
+ls -l
+

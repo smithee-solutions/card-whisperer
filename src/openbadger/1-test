@@ -1,0 +1,13 @@
+#!/bin/bash
+set -x
+echo >oes.log OES ACDO Calculation Test
+echo >>oes.log "-------- --------"
+echo >>oes.log --- AN-10957 Example
+./create-OES-contents 2>>oes.log
+echo >>oes.log "-------- --------"
+echo >>oes.log "--- INID Example (C0... key)"
+./create-OES-contents inid-c0.json 2>>oes.log
+echo >>oes.log "-------- --------"
+echo >>oes.log "--- INID Example (D0... key)"
+./create-OES-contents inid-d0.json 2>>oes.log
+

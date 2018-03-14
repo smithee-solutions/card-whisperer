@@ -1,0 +1,18 @@
+{
+  "_#" : "parameter file for openbadger",
+
+  "OES" : "1",
+
+     "verbosity" : "9",
+
+           "UID" : "0466466A8C3F80",
+    "credential" : "00000003",
+      "facility" : "0000007B",
+         "OCPSK" : "D0D1D2D3D4D5D6D7D8D9DADBDCDDDEDF",
+  "cred_version" : "0",
+        "format" : "2",
+          "PICC" : "00",
+
+  "_#" : "that a that a that a that's all, folks!!!"
+}
+

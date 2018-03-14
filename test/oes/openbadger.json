@@ -1,0 +1,17 @@
+{
+  "_#" : "parameter file for openbadger",
+
+     "verbosity" : "9",
+  "manufacturer" : "iqdevices.com",
+
+           "UID" : "04DEADBEEFFEED",
+    "credential" : "0000000000065530",
+      "facility" : "0000001122",
+     "cust_data" : "0011223344556677889900112233445566778899",
+         "OCPSK" : "F3f9377698707B688EAF84ABE39E3791",
+  "cred_version" : "0",
+          "PICC" : "00",
+
+  "_#" : "that a that a that a that's all, folks!!!"
+}
+

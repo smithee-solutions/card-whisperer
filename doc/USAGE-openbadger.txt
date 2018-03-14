@@ -1,0 +1,22 @@
+To use this, create a parameter file and run create-OES-contents.
+Example json files are in the "test" directory.
+
+References
+  AN10957 Generic Access Control Data Model
+  Rev. 1.1 - 7 March 2011
+  196811
+
+parameters
+  UID - UID of card.
+  credential - cardholder number
+  facility - facility code
+  OCPSK - signing key for OES data
+  cred_version - normally 0
+  format - 2 for INID OES TLV format
+  cust_data - customer data (AN 10957 format)
+  
+  OES - if present selects INID OES format
+        if absent selects AN-10957 format
+  PICC - key for PICC
+  verbosity - normally 3, set to 9 for debug, set to 99 for verbose debug
+

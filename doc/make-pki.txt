@@ -1,0 +1,38 @@
+default script is pki.script in current directory.
+
+runs /opt/tester/bin/openssl
+
+how it works
+
+values:
+openssl-config
+subject-name
+ca-name
+
+actions:
+request-key-pair
+
+commands
+
+; - comment echoed in log
+# - comment not echoed in log
+
+m+
+makes directory (first arg)
+
+n-
+pki name
+
+r-
+request key pair.  args:
+  t.b.d.
+
+s<
+subject name (remainder of line)
+
+t+
+touch a file
+
+x-
+clear and initialize pki
+

@@ -1,0 +1,61 @@
+#!/bin/bash
+TBIN=/opt/tester/bin
+
+CREDNUM=000001
+AGENCY=9999
+SYSTEM=9999
+FASCN_CS=1
+FASCN_ICI=1
+FASCN_OC=3
+FASCN_POA=6
+
+CREDNUM=000001
+${TBIN}/write-chuid --loglevel=3 --out chuid_sample_${CREDNUM}.bin \
+  --agency=9999 --credential=${CREDNUM} --system=9999 --cs 1 --ici 1 \
+  --pi=1000${CREDNUM} --oc=3 --poa=${FASCN_POA}
+
+CREDNUM=000002
+${TBIN}/write-chuid --loglevel=3 --out chuid_sample_${CREDNUM}.bin \
+  --agency=9999 --credential=${CREDNUM} --system=9999 --cs 1 --ici 1 \
+  --pi=1000${CREDNUM} --oc=3 --poa=${FASCN_POA}
+
+CREDNUM=000003
+${TBIN}/write-chuid --loglevel=3 --out chuid_sample_${CREDNUM}.bin \
+  --agency=9999 --credential=${CREDNUM} --system=9999 --cs 1 --ici 1 \
+  --pi=1000${CREDNUM} --oc=3 --poa=${FASCN_POA}
+
+CREDNUM=000004
+${TBIN}/write-chuid --loglevel=3 --out chuid_sample_${CREDNUM}.bin \
+  --agency=9999 --credential=${CREDNUM} --system=9999 --cs 1 --ici 1 \
+  --pi=1000${CREDNUM} --oc=3 --poa=${FASCN_POA}
+
+CREDNUM=000005
+${TBIN}/write-chuid --loglevel=3 --out chuid_sample_${CREDNUM}.bin \
+  --agency=9999 --credential=${CREDNUM} --system=9999 --cs 1 --ici 1 \
+  --pi=1000${CREDNUM} --oc=3 --poa=${FASCN_POA}
+
+CREDNUM=000006
+${TBIN}/write-chuid --loglevel=3 --out chuid_sample_${CREDNUM}.bin \
+  --agency=9999 --credential=${CREDNUM} --system=9999 --cs 1 --ici 1 \
+  --pi=1000${CREDNUM} --oc=3 --poa=${FASCN_POA}
+
+CREDNUM=000007
+${TBIN}/write-chuid --loglevel=3 --out chuid_sample_${CREDNUM}.bin \
+  --agency=9999 --credential=${CREDNUM} --system=9999 --cs 1 --ici 1 \
+  --pi=1000${CREDNUM} --oc=3 --poa=${FASCN_POA}
+
+CREDNUM=000008
+${TBIN}/write-chuid --loglevel=3 --out chuid_sample_${CREDNUM}.bin \
+  --agency=9999 --credential=${CREDNUM} --system=9999 --cs 1 --ici 1 \
+  --pi=1000${CREDNUM} --oc=3 --poa=${FASCN_POA}
+
+CREDNUM=000009
+${TBIN}/write-chuid --loglevel=3 --out chuid_sample_${CREDNUM}.bin \
+  --agency=9999 --credential=${CREDNUM} --system=9999 --cs 1 --ici 1 \
+  --pi=1000${CREDNUM} --oc=3 --poa=${FASCN_POA}
+
+CREDNUM=000010
+${TBIN}/write-chuid --loglevel=3 --out chuid_sample_${CREDNUM}.bin \
+  --agency=9999 --credential=${CREDNUM} --system=9999 --cs 1 --ici 1 \
+  --pi=1000${CREDNUM} --oc=3 --poa=${FASCN_POA}
+
