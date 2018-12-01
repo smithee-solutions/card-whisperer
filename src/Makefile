@@ -28,16 +28,19 @@ all:
 	(cd lscard; make; cd ..)
 	(cd openbadger; make; cd ..)
 	(cd whoiscard; make; cd ..);
+	(cd credwrench; make; cd ..);
 
 clean:
 	(cd libcardwhisper; make clean; cd ..)
 	(cd lscard; make clean; cd ..)
 	(cd openbadger; make clean; cd ..)
 	(cd whoiscard; make clean; cd ..);
+	(cd credwrench; make clean; cd ..);
 
 build:	all
 	(cd libcardwhisper; make build; cd ..)
 	(cd lscard; make build; cd ..)
 	(cd openbadger; make build; cd ..)
 	(cd whoiscard; make build; cd ..)
+	(cd credwrench; make build; cd ..);
 

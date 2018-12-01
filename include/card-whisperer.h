@@ -237,6 +237,14 @@ typedef struct cshh_fasc_n
     poa [1];
 } CSHH_FASC_N;
 
+// card whisperer running context (migrating from "config")
+
+typedef struct cshh_context
+{
+  int verbosity; // 0=quiet, 1=muted, 3=normal, 9=troubleshoot
+} CSHH_CONTEXT;
+
+
 
 int
   chuid_add

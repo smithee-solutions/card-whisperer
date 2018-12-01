@@ -16,7 +16,7 @@
   limitations under the License.
 */
 
-#define CSHH_VERSION_STRING "card-whisperer 0.40 Build 1"
+#define CSHH_VERSION_STRING "card-whisperer 0.40 Build 2"
 
 #define _DEFINED_CARD_WHISPERER_VERSION_H
 

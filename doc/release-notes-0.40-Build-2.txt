@@ -1,0 +1,5 @@
+added card whisperer context
+
+  portions based on Ludovic Rousseau's blog post
+    http://ludovicrousseau.blogspot.com/2010/04/pcsc-sample-in-c.html
+
