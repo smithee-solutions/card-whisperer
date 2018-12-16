@@ -51,8 +51,7 @@ extern int optind;
   return -1; \
  }
 
-CSSH_CONFIG
-  lscard_config;
+CSSH_CONFIG lscard_config;
 BYTE
   data_element_chuid [16384];
 int
@@ -80,6 +79,7 @@ int
     *card_operation;
   BYTE
     *cbptr;
+  CSHH_CONFIG *ctx;
   int
     done;
   DWORD
@@ -96,31 +96,28 @@ int
     more;
   LPTSTR
     mszReaders;
-  BYTE
-    pbRecvBuffer [2000 /*258 */];
-  char
-    *protocol_name;
-  LONG
-    rv;
-  int
-    status;
-  int
-    status_io;
-  int
-    wlth;
-  BYTE
-    uncompressed_buffer [32768];
+  int offset;
+  BYTE pbRecvBuffer [2000 /*258 */];
+  char *protocol_name;
+  char *rdr_list;
+  int reader_index;
+  LONG rv;
+  int status;
+  int status_io;
+  LONG status_pcsc;
+  int wlth;
+  BYTE uncompressed_buffer [32768];
 
 
-  BYTE
-    cmd1 [] = 
 // orig from sample.c { 0x00, 0xA4, 0x04, 0x00, 0x0A, 0xA0,
 //  0x00, 0x00, 0x00, 0x62, 0x03, 0x01, 0x0C, 0x06, 0x01 };
 // ?twic    { 0x00, 0xA4, 0x04, 0x00, 0x09, 0xA0, 0x00, 0x00, 0x03, 0x08, 0x00, 0x00, 0x10, 0x00, 00 };
-{
 // 0x00, 0xA4, 0x04, 0x00, 0x0F, 0xD2, 0x33, 0x00, 0x00, 0x00, 0x45, 0x73, 0x74, 0x45, 0x49, 0x44, 0x20, 0x76, 0x33, 0x35
-  0x00, 0xA4, 0x04, 0x00, 0x09, 0xA0, 0x00, 0x00, 0x03, 0x08, 0x00, 0x00, 0x10, 0x00, 0x00
-};
+
+  BYTE
+    cmd1 [] = {
+      0x00, 0xA4, 0x04, 0x00,  0x09, 0xA0, 0x00, 0x00,
+      0x03, 0x08, 0x00, 0x00,  0x10, 0x00, 0x00 };
   BYTE cmd2[] = 
 // orig { 0x00, 0x00, 0x00, 0x00 };
 {
@@ -160,6 +157,7 @@ int
   fprintf (stderr, "lscard (%s)\n", CSHH_VERSION_STRING);
   status = ST_OK;
   memset (&lscard_config, 0, sizeof (lscard_config));
+  ctx = &lscard_config;
   strcpy (lscard_config.prefix, "card-sample-0001");
   lscard_config.final_object = uncompressed_buffer;
   action_list = 0;
@@ -193,59 +191,77 @@ int
 CHECK ("SCardListReaders", rv)
 
     mszReaders = calloc (dwReaders, sizeof(char));
-    rv = SCardListReaders (hContext, NULL, mszReaders, &dwReaders);
-CHECK ("SCardListReaders", rv)
-    if (lscard_config.verbosity > 1)
-      fprintf (stderr, "First reader is %s\n", mszReaders);
-
-{
-  int found;
-  found=0;
-  while (!found)
-  {
-    rv = SCardConnect (hContext, mszReaders, SCARD_SHARE_SHARED,
-      SCARD_PROTOCOL_T0 | SCARD_PROTOCOL_T1, &lscard_config.pcsc, &dwActiveProtocol);
-     if (SCARD_S_SUCCESS == rv) 
-       found = 1;
-     else
-       printf("SCardConnect: %s\n", pcsc_stringify_error(rv)); \
+    status_pcsc = SCardListReaders (hContext, NULL, mszReaders, &dwReaders);
+    if (status_pcsc != SCARD_S_SUCCESS)
+      status = ST_CSHH_SCARD_ERROR;
   };
-};
-
-    switch (dwActiveProtocol)
+  if (status EQUALS ST_OK)
+  {
+    done = 0;
+    offset = 0;
+    reader_index = 0;
+    rdr_list = mszReaders;
+    ctx->reader_name [0] = 0;
+    while (!done)
     {
-    case SCARD_PROTOCOL_T0:
-      lscard_config.pioSendPci = *SCARD_PCI_T0;
-      protocol_name = "T0";
-      break;
+      fprintf(stderr, "  Reader %d: %s\n", reader_index, rdr_list);
+      if (reader_index EQUALS ctx->reader_index)
+      {
+        strcpy (ctx->reader_name, rdr_list);
+        done = 1;
+      };
+      if ((1+offset) >= dwReaders)
+        done = 1;
+      reader_index ++;
+      offset = offset + strlen(rdr_list) + 1;
+      rdr_list = strlen(rdr_list) + 1 + mszReaders;
+    };
 
-    case SCARD_PROTOCOL_T1:
-      lscard_config.pioSendPci = *SCARD_PCI_T1;
-      protocol_name = "T1";
-      break;
-    }
-    dwRecvLength = sizeof (pbRecvBuffer);
-    if (lscard_config.verbosity > 1)
-      fprintf (stderr, "Protocol is %s\n", protocol_name);
-    if (lscard_config.verbosity > 2)
-      fprintf (stderr, "SCardTransmit (step 1 select card applet)\n");
+    if (ctx->verbosity > 1)
+      if (strlen(ctx->reader_name) > 0)
+        fprintf (stderr, "Selected reader (%d) is %s\n", ctx->reader_index, ctx->reader_name);
+  };
+  if (status EQUALS ST_OK)
+  {
+    status_pcsc = SCardConnect (hContext, ctx->reader_name, SCARD_SHARE_SHARED,
+      SCARD_PROTOCOL_T0 | SCARD_PROTOCOL_T1, &(ctx->pcsc), &dwActiveProtocol);
+    if (SCARD_S_SUCCESS != status_pcsc)
+      printf("SCardConnect: %s\n", pcsc_stringify_error(status_pcsc));
+
+  switch (dwActiveProtocol)
+  {
+  case SCARD_PROTOCOL_T0:
+    lscard_config.pioSendPci = *SCARD_PCI_T0;
+    protocol_name = "T0";
+    break;
+
+  case SCARD_PROTOCOL_T1:
+    lscard_config.pioSendPci = *SCARD_PCI_T1;
+    protocol_name = "T1";
+    break;
+  }
+  dwRecvLength = sizeof (pbRecvBuffer);
+  if (lscard_config.verbosity > 1)
+    fprintf (stderr, "Protocol is %s\n", protocol_name);
+  if (lscard_config.verbosity > 2)
+    fprintf (stderr, "SCardTransmit (step 1 select card applet)\n");
+  if (lscard_config.verbosity > 3)
+  {
+    dump_buffer (&lscard_config, cmd1, sizeof (cmd1), 0);
+  };
+  rv = SCardTransmit (lscard_config.pcsc, &lscard_config.pioSendPci, cmd1, sizeof(cmd1),
+    NULL, pbRecvBuffer, &dwRecvLength);
+  strcpy (lscard_config.card_operation, "SCardTransmit");
+  if (SCARD_S_SUCCESS != rv)
+    status = ST_CSHH_PCSC_ERROR;
+  };
+
+  if (status EQUALS ST_OK)
+  {
     if (lscard_config.verbosity > 3)
     {
-      dump_buffer (&lscard_config, cmd1, sizeof (cmd1), 0);
-    };
-    rv = SCardTransmit (lscard_config.pcsc, &lscard_config.pioSendPci, cmd1, sizeof(cmd1),
-      NULL, pbRecvBuffer, &dwRecvLength);
-    strcpy (lscard_config.card_operation, "SCardTransmit");
-    if (SCARD_S_SUCCESS != rv)
-      status = ST_CSHH_PCSC_ERROR;
-
-    if (status EQUALS ST_OK)
-    {
-      if (lscard_config.verbosity > 3)
-      {
-        fprintf (stderr, "Response to applet select: ");
-        dump_buffer (&lscard_config, pbRecvBuffer, dwRecvLength, 0);
-      };
+      fprintf (stderr, "Response to applet select: ");
+      dump_buffer (&lscard_config, pbRecvBuffer, dwRecvLength, 0);
     };
   };
 
@@ -546,8 +562,11 @@ CHECK("SCardTransmit", rv)
   };
 
   if (status != ST_OK)
-    printf ("Status %d returned\n", status);
+    if (status != ST_CSHH_NO_ARGUMENTS) // help case
+      printf ("Status %d returned\n", status);
 
+  if (status EQUALS ST_OK)
+  {
    rv = SCardDisconnect(lscard_config.pcsc, SCARD_LEAVE_CARD);
 CHECK("SCardDisconnect", rv)
 
@@ -556,6 +575,7 @@ CHECK("SCardDisconnect", rv)
    strcpy (lscard_config.card_operation, "SCardReleaseContext");
    if (SCARD_S_SUCCESS != rv) 
      lscard_config.last_rv = rv;
+  };
 
   if (status != ST_OK)
   {

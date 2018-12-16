@@ -135,38 +135,22 @@
 
 typedef struct cssh_config
 {
-  int
-    action;
-  int
-    use_pin;
-  int
-    analyze;
-  int
-    verbosity;
-  FILE
-    *current_file;
-  char
-    reader_name [1024];
-  int
-    reader_index;
-  SCARDHANDLE
-    pcsc;
-  LONG
-    last_rv;
-  SCARD_IO_REQUEST
-    pioSendPci;
-  char
-     prefix [1024];
-  char
-     pin [32];
-  unsigned char
-    *final_object;
-  int
-    final_object_length;
-  char
-    card_operation [1024];
-  SCARDCONTEXT
-    pcsc_context;
+  int action;
+  int use_pin;
+  int analyze;
+  int verbosity;
+  FILE *current_file;
+  char reader_name [1024];
+  int reader_index;
+  SCARDHANDLE pcsc;
+  LONG last_rv;
+  SCARD_IO_REQUEST pioSendPci;
+  char prefix [1024];
+  char pin [32];
+  unsigned char *final_object;
+  int final_object_length;
+  char card_operation [1024];
+  SCARDCONTEXT pcsc_context;
   unsigned char historical_bytes [258];
   int historical_count;
 } CSSH_CONFIG;

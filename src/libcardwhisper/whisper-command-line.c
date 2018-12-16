@@ -1,5 +1,5 @@
 /*
-  whisper-utils.c - utility code for card-whisperer
+  whisper-command-line.c - command line processor for for card-whisperer
 
   Copyright 2017-2018 Smithee Solutions LLC
 
@@ -19,6 +19,7 @@
     http://ludovicrousseau.blogspot.com/2010/04/pcsc-sample-in-c.html
 */
 
+
 #include <stdio.h>
 #include <string.h>
 #include <getopt.h>
@@ -26,6 +27,8 @@
 #include <sys/stat.h>
 extern char *optarg;
 extern int optind;
+
+
 #include <PCSC/wintypes.h>
 #include <PCSC/pcsclite.h>
 #include <PCSC/winscard.h>
@@ -33,8 +36,7 @@ extern int optind;
 
 #include <card-whisperer.h>
 
-char
-  test_pin [1024];
+char test_pin [1024];
 
 
 int
@@ -46,14 +48,10 @@ int
 
 { /* init_command_line */
 
-  int
-    done;
-  int
-    found_something;
-  int
-    i;
-  int
-    longindex;
+  int done;
+  int found_something;
+  int i;
+  int longindex;
   struct option
     longopts [] = {
       {"allcerts", 0, &(cfg->action), CSHH_ALL_CERTS},
@@ -67,16 +65,14 @@ int
       {"pivauth", 0, &(cfg->action), CSHH_PIVAUTH},
       {"finger", 0, &(cfg->action), CSHH_FINGERS},
       {"face", 0, &(cfg->action), CSHH_FACE},
+      {"reader", 1, &(cfg->action), CSHH_READER_INDEX},
       {"use-PIN", 0, &(cfg->action), CSHH_USE_PIN},
       {"PIN-value", required_argument, &(cfg->action), CSHH_PIN_VALUE},
       {0, 0, 0, 0}
     };
-  char
-    optstring [1024];
-  int
-    status;
-  int
-    status_opt;
+  char optstring [1024];
+  int status;
+  int status_opt;
 
 
   status = ST_OK;
@@ -98,15 +94,18 @@ int
       fprintf (stdout, "  --allcerts - dump all certs\n");
       fprintf (stdout, "  --alldata - dump all data available\n");
       fprintf (stdout, "  --analyze - run post-extraction analysis\n");
-      fprintf (stdout, "  --help - this help list\n");
+      fprintf(stdout, " --capas\n");
       fprintf (stdout, "  --cardauth - dump the Card Auth Cert\n");
       fprintf (stdout, "  --chuid - dump the CHUID field.\n");
       fprintf (stdout, "  --capas - dump Card Capability Container\n");
+      fprintf(stdout, "  --face\n");
+      fprintf(stdout, "  --finger - dump fingerprint biometrics (uses PIN)\n");
+      fprintf(stdout, "  --help - this help list\n");
       fprintf (stdout, "  --loglevel=99 - set log verbosity (1=normal, 3=detailed, 9=debug, 99=max)\n");
       fprintf (stdout, "  --pivauth - dump the PIV Auth Cert\n");
-      fprintf (stdout, "  --finger - dump fingerprint biometrics (uses PIN)\n");
-      fprintf (stdout, "  --use-PIN - must be explictly specified to enable PIN-based operations\n");
       fprintf (stdout, "  --PIN-value=123456 - set to pin value WARNING exposes key material on command line\n");
+      fprintf(stdout, "  --reader - specify reader number (0,1,2...)\n");
+      fprintf(stdout, "  --use-PIN - must be explictly specified to enable PIN-based operations\n");
       status = ST_CSHH_NO_ARGUMENTS;
       break;
     case CSHH_ALL:
@@ -159,6 +158,11 @@ int
     case CSHH_PIVAUTH:
       found_something = 1;
       *action_list = *action_list | MASK_GET_PIV_AUTH_CERT;
+      break;
+    case CSHH_READER_INDEX:
+      found_something = 1;
+      sscanf (optarg, "%d", &i);
+      cfg->reader_index = i;
       break;
     case CSHH_USE_PIN:
       found_something = 1;
