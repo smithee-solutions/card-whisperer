@@ -210,6 +210,8 @@ int
   {
     unsigned char command_retrieve_electrical_profile [] =
       { 0x00, 0xCA, 0x00, 0xEE, 0x00 };
+    unsigned char command_retrieve_card_serial [] =
+      { 0xFF, 0xCA, 0x00, 0x00, 0x00 };
     int rcount;
     unsigned char response [258];
     int response_length;
@@ -246,6 +248,15 @@ int
     {
       printf("unrecognized response.\n");
     };
+
+    printf("Trying CSN...\n");
+    response_length = sizeof(response);
+    memset(response, 0, sizeof(response));
+    status = try_command (ctx, command_retrieve_card_serial,
+      sizeof (command_retrieve_card_serial),
+      response, &response_length);
+    { int i; for (i=0; i<response_length; i++) printf(" %02x", response [i]); printf("\n"); }
+
     if (unfinished)
       printf ("parsing incomplete\n");
   };
