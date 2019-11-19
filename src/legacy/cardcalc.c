@@ -21,7 +21,7 @@
 #include <getopt.h>
 
 
-#define VERSION_STRING_CARDCALC "0.01-1"
+#define VERSION_STRING_CARDCALC "0.02-1"
 #define CARDCALC_MAX_OCTETS (1024)
 #define CARDCALC_MAX_BITS (8*CARDCALC_MAX_OCTETS)
 
@@ -40,6 +40,7 @@ typedef struct cardcalc_context
   int card_format;
   char format_name [1024];
   int verbosity;
+  char mask_1_odd_parity [1024];
 } CARDCALC_CONTEXT;
 
 #define EQUALS ==
@@ -53,7 +54,10 @@ struct option longopts [] = {
   {"hex", required_argument, &option, CARDCALC_OPT_HEX},
   {"verbosity", required_argument, &option, CARDCALC_OPT_VERBOSITY},
   {0, 0, 0, 0}};
+
 char * cardcalc_mask (CARDCALC_CONTEXT *ctx, char *bitstring, char *mask);
+int cardcalc_parity_odd(CARDCALC_CONTEXT *ctx, char *data_string,
+  char *parity_mask);
 
 char *
   binary_string
@@ -84,7 +88,8 @@ unsigned long int
     (CARDCALC_CONTEXT *ctx,
     char *bitstring)
 
-{
+{ /* cardcalc_bits_to_decimal */
+
   int done;
   int index;
   unsigned long int value;
@@ -100,7 +105,7 @@ unsigned long int
       value = value << 1;
       if (bitstring [index] EQUALS '1')
         value = value + 1;
-      if (ctx->verbosity > 3)
+      if (ctx->verbosity > 9)
         fprintf(stderr, "DEBUG: value 0x%lx %lu.\n", value, value);
     };
     if (index > strlen(bitstring))
@@ -108,7 +113,8 @@ unsigned long int
     index++;
   };
   return(value);
-}
+
+} /* cardcalc_bits_to_decimal */
 
 
 int
@@ -122,13 +128,18 @@ int
   unsigned long int ch;
   char facility_code_mask [CARDCALC_MAX_BITS+1];
   unsigned long int fc;
+  int parity_1_odd;
   int status;
 
 
   status = ST_OK;
+  parity_1_odd = 0;
+
   if (ctx->card_format EQUALS CARDCALC_FMT_CORP1000_48)
   {
     ctx->bits = 48;
+    strcpy(ctx->mask_1_odd_parity,
+      "000110011011011011000000000000000000000000000000");
     strcpy(ctx->format_name, "Corporate 1000 48 Bit");
   };
 
@@ -154,6 +165,12 @@ int
 "001111111111111111111111000000000000000000000000");
     strcpy(cardholder_mask,
 "000000000000000000000000111111111111111111111110");
+    if (strlen(ctx->mask_1_odd_parity) > 0)
+    {
+      fprintf(stdout,
+" Parity (odd): %s\n",
+        ctx->mask_1_odd_parity);
+    };
     fprintf(stdout,
 "          Raw: %s\n", whole_binary_string);
     fprintf(stdout, 
@@ -163,12 +180,19 @@ int
 "   Cardholder: %s\n",
   cardcalc_mask(ctx, whole_binary_string, cardholder_mask));
 
-fprintf(stderr,
+fprintf(stdout,
 "               12345678----++++12345678----++++12345678----++++\n");
-fprintf(stderr,
+fprintf(stdout,
 "               000000000011111111112222222222333333333344444444\n");
-fprintf(stderr,
+fprintf(stdout,
 "               012345678901234567890123456789012345678901234567\n");
+
+    if (strlen(ctx->mask_1_odd_parity) > 0)
+      parity_1_odd = cardcalc_parity_odd(ctx,
+        whole_binary_string, ctx->mask_1_odd_parity);
+    fprintf(stdout,
+" Parity=%d (Odd) with mask %s\n",
+      parity_1_odd, ctx->mask_1_odd_parity);
 
     fc = cardcalc_bits_to_decimal(ctx, 
       cardcalc_mask(ctx, whole_binary_string, facility_code_mask)),
@@ -211,6 +235,41 @@ char *
   return(result);
 
 } /* cardcalc_mask */
+
+int
+  cardcalc_parity_odd
+    (CARDCALC_CONTEXT *ctx,
+    char *data_string,
+    char *parity_mask)
+
+{ /* cardcalc_parity_odd */
+
+  int i;
+  int mask_length;
+  int returned_parity;
+
+
+  returned_parity = 0;
+  mask_length = strlen(parity_mask);
+  if (ctx->verbosity > 3)
+    fprintf(stderr, "DEBUG: calc odd parity lth %d.\n", mask_length);
+  for (i=0; i<mask_length; i++)
+  {
+    if (parity_mask [i] EQUALS '1')
+    {
+      if (data_string [i] EQUALS '1')
+      {
+        if (ctx->verbosity > 3)
+          fprintf(stderr, "Parity calc idx %02d mask %c value %c\n",
+            i, parity_mask [i], data_string [i]);
+        returned_parity++;
+      };
+    };
+  };
+  returned_parity = returned_parity & 0x01;
+  return(returned_parity);
+
+} /* cardcalc_parity_odd */
 
 
 int
@@ -311,7 +370,7 @@ int
     sscanf(temp_octet_string, "%x", &temp_octet);
     data_string [data_index] = temp_octet;
     strcat(whole_binary_string, binary_string(data_string [data_index]));
-    if (ctx->verbosity > 3)
+    if (ctx->verbosity > 9)
       fprintf(stdout, "Octet %02d. is hex %02x binary %s\n",
         i,  data_string [data_index], binary_string(data_string [data_index]));
     data_index ++;
