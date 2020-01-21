@@ -139,7 +139,7 @@ int
   {
     ctx->bits = 48;
     strcpy(ctx->mask_1_odd_parity,
-      "000110011011011011000000000000000000000000000000");
+      "000110110110110110110110110110110110110110110110");
     strcpy(ctx->format_name, "Corporate 1000 48 Bit");
   };
 
@@ -266,7 +266,12 @@ int
       };
     };
   };
+  // if the sum was EVEN then parity is 1 to cause an ODD parity sum
   returned_parity = returned_parity & 0x01;
+  if (returned_parity & 1)
+    returned_parity = 0; // sum was already odd
+  else
+    returned_parity = 1; // sump was even, make it odd
   return(returned_parity);
 
 } /* cardcalc_parity_odd */

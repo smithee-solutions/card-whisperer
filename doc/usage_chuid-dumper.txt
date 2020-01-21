@@ -1,0 +1,4 @@
+unwind dumps a 75 bit CHUID in a readable format.  Usage:
+
+unwind <hex of CHUID>
+
