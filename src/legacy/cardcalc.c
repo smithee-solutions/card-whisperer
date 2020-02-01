@@ -57,6 +57,8 @@ struct option longopts [] = {
   {0, 0, 0, 0}};
 
 char * cardcalc_mask (CARDCALC_CONTEXT *ctx, char *bitstring, char *mask);
+int cardcalc_parity_even(CARDCALC_CONTEXT *ctx, char *data_string,
+  char *parity_mask);
 int cardcalc_parity_odd(CARDCALC_CONTEXT *ctx, char *data_string,
   char *parity_mask);
 
@@ -99,14 +101,10 @@ unsigned long int
   value = 0;
   done = 0;
   index =0;
-fprintf(stderr, "DEBUG: bitstring length %ld.\n", strlen(bitstring));
   while (!done)
   {
-fprintf(stderr, "DEBUG: bitstring[%d]=%x\n",
-  index, bitstring [index]);
     if ((bitstring [index] != ' ') && (bitstring [index] != 0))
     {
-fprintf(stderr, "DEBUG: idx=%d old value %ld. bitstring %x\n", index, value, bitstring [index]);
       value = value << 1;
       if (bitstring [index] EQUALS '1')
         value = value + 1;
@@ -134,6 +132,7 @@ int
   char facility_code_mask [CARDCALC_MAX_BITS+1];
   unsigned long int fc;
   int parity_1_odd;
+  int parity_2_even;
   int status;
 
 
@@ -141,12 +140,15 @@ int
   memset(facility_code_mask, 0, sizeof(facility_code_mask));
   memset(cardholder_mask, 0, sizeof(facility_code_mask));
   parity_1_odd = 0;
+  parity_2_even = 0;
 
   if (ctx->card_format EQUALS CARDCALC_FMT_26BIT)
   {
     ctx->bits = 26;
-    strcpy( ctx->mask_1_odd_parity, "01111111111110000000000000");
-    strcpy(ctx->mask_2_even_parity, "00000000000001111111111110");
+//    strcpy( ctx->mask_1_odd_parity, "01111111111110000000000000");
+//    strcpy(ctx->mask_2_even_parity, "00000000000001111111111110");
+     strcpy( ctx->mask_1_odd_parity, "00000000000001111111111110");
+    strcpy( ctx->mask_2_even_parity, "01111111111110000000000000");
     strcpy(ctx->format_name, "SIA 26 Bit");
   };
   if (ctx->card_format EQUALS CARDCALC_FMT_CORP1000_48)
@@ -169,6 +171,12 @@ int
   case CARDCALC_FMT_26BIT:
     strcpy(facility_code_mask, " 11111111                 ");
     strcpy(cardholder_mask, "00000000011111111111111110");
+    if (strlen(ctx->mask_2_even_parity) > 0)
+    {
+      fprintf(stdout,
+"Parity (even): %s\n",
+        ctx->mask_2_even_parity);
+    };
     if (strlen(ctx->mask_1_odd_parity) > 0)
     {
       fprintf(stdout,
@@ -191,6 +199,12 @@ fprintf(stdout,
 fprintf(stdout,
 "               012345678901234567890123456789012345678901234567\n");
 
+    if (strlen(ctx->mask_2_even_parity) > 0)
+      parity_2_even = cardcalc_parity_even(ctx,
+        whole_binary_string, ctx->mask_2_even_parity);
+    fprintf(stdout,
+"Parity=%d (Even) with mask %s\n",
+      parity_2_even, ctx->mask_2_even_parity);
     if (strlen(ctx->mask_1_odd_parity) > 0)
       parity_1_odd = cardcalc_parity_odd(ctx,
         whole_binary_string, ctx->mask_1_odd_parity);
@@ -289,6 +303,48 @@ char *
   return(result);
 
 } /* cardcalc_mask */
+
+
+int
+  cardcalc_parity_even
+    (CARDCALC_CONTEXT *ctx,
+    char *data_string,
+    char *parity_mask)
+
+{ /* cardcalc_parity_even */
+
+  int i;
+  int mask_length;
+  int returned_parity;
+
+
+  returned_parity = 0;
+  mask_length = strlen(parity_mask);
+  if (ctx->verbosity > 3)
+    fprintf(stderr, "DEBUG: calc even parity lth %d.\n", mask_length);
+  for (i=0; i<mask_length; i++)
+  {
+    if (parity_mask [i] EQUALS '1')
+    {
+      if (data_string [i] EQUALS '1')
+      {
+        if (ctx->verbosity > 3)
+          fprintf(stderr, "Parity calc idx %02d mask %c value %c\n",
+            i, parity_mask [i], data_string [i]);
+        returned_parity++;
+      };
+    };
+  };
+  // if the sum was EVEN then parity is 1 to cause an ODD parity sum
+  returned_parity = returned_parity & 0x01;
+  if (returned_parity & 1)
+    returned_parity = 1; // sum was already even
+  else
+    returned_parity = 0; // sump was odd, make it even
+  return(returned_parity);
+
+} /* cardcalc_parity_even */
+
 
 int
   cardcalc_parity_odd
