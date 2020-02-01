@@ -41,6 +41,7 @@ typedef struct cardcalc_context
   char format_name [1024];
   int verbosity;
   char mask_1_odd_parity [1024];
+  char mask_2_even_parity [1024];
 } CARDCALC_CONTEXT;
 
 #define EQUALS ==
@@ -98,14 +99,18 @@ unsigned long int
   value = 0;
   done = 0;
   index =0;
+fprintf(stderr, "DEBUG: bitstring length %ld.\n", strlen(bitstring));
   while (!done)
   {
-    if (bitstring [index] != ' ')
+fprintf(stderr, "DEBUG: bitstring[%d]=%x\n",
+  index, bitstring [index]);
+    if ((bitstring [index] != ' ') && (bitstring [index] != 0))
     {
+fprintf(stderr, "DEBUG: idx=%d old value %ld. bitstring %x\n", index, value, bitstring [index]);
       value = value << 1;
       if (bitstring [index] EQUALS '1')
         value = value + 1;
-      if (ctx->verbosity > 9)
+      if (ctx->verbosity > 3)
         fprintf(stderr, "DEBUG: value 0x%lx %lu.\n", value, value);
     };
     if (index > strlen(bitstring))
@@ -133,8 +138,17 @@ int
 
 
   status = ST_OK;
+  memset(facility_code_mask, 0, sizeof(facility_code_mask));
+  memset(cardholder_mask, 0, sizeof(facility_code_mask));
   parity_1_odd = 0;
 
+  if (ctx->card_format EQUALS CARDCALC_FMT_26BIT)
+  {
+    ctx->bits = 26;
+    strcpy( ctx->mask_1_odd_parity, "01111111111110000000000000");
+    strcpy(ctx->mask_2_even_parity, "00000000000001111111111110");
+    strcpy(ctx->format_name, "SIA 26 Bit");
+  };
   if (ctx->card_format EQUALS CARDCALC_FMT_CORP1000_48)
   {
     ctx->bits = 48;
@@ -151,6 +165,45 @@ int
   {
   default:
     fprintf(stderr, "Unknown format (%d)\n", ctx->card_format);
+    break;
+  case CARDCALC_FMT_26BIT:
+    strcpy(facility_code_mask, " 11111111                 ");
+    strcpy(cardholder_mask, "00000000011111111111111110");
+    if (strlen(ctx->mask_1_odd_parity) > 0)
+    {
+      fprintf(stdout,
+" Parity (odd): %s\n",
+        ctx->mask_1_odd_parity);
+    };
+    fprintf(stdout,
+"          Raw: %s\n", whole_binary_string);
+    fprintf(stdout, 
+"Facility Code: %s\n",
+  cardcalc_mask(ctx, whole_binary_string, facility_code_mask));
+    fprintf(stdout, 
+"   Cardholder: %s\n",
+  cardcalc_mask(ctx, whole_binary_string, cardholder_mask));
+
+fprintf(stdout,
+"               12345678----++++12345678----++++12345678----++++\n");
+fprintf(stdout,
+"               000000000011111111112222222222333333333344444444\n");
+fprintf(stdout,
+"               012345678901234567890123456789012345678901234567\n");
+
+    if (strlen(ctx->mask_1_odd_parity) > 0)
+      parity_1_odd = cardcalc_parity_odd(ctx,
+        whole_binary_string, ctx->mask_1_odd_parity);
+    fprintf(stdout,
+" Parity=%d (Odd) with mask %s\n",
+      parity_1_odd, ctx->mask_1_odd_parity);
+
+    fc = cardcalc_bits_to_decimal(ctx, 
+      cardcalc_mask(ctx, whole_binary_string, facility_code_mask)),
+    ch = cardcalc_bits_to_decimal(ctx,
+      cardcalc_mask(ctx, whole_binary_string, cardholder_mask));
+    fprintf(stdout, "FC %lu.(0x%08lx) CH %lu.(0x%08lx)\n",
+      fc, fc, ch, ch);
     break;
   case CARDCALC_FMT_CORP1000_48:
 //fprintf(stderr, "DEBUG: Poooooooooooooooo\n");
@@ -220,6 +273,7 @@ char *
   static char result [CARDCALC_MAX_BITS+1];
 
 
+  memset(result, 0, sizeof(result));
   mask_size = 0;
   for (idx=0; idx<strlen(bitstring); idx++)
   {
@@ -308,6 +362,8 @@ int
   ctx->verbosity = 3;
   status = ST_OK;
   strcpy(hex_string, "1234abcd");
+  fprintf(stdout, "cardcalc %s\n", VERSION_STRING_CARDCALC);
+
   done = 0;
   found_something = 0;
   option = CARDCALC_OPT_NOOP;
@@ -336,6 +392,8 @@ int
       break;
     case CARDCALC_OPT_FORMAT:
       ctx->card_format = CARDCALC_FMT_UNKNOWN;
+      if (strcmp(optarg, "26BIT") EQUALS 0)
+        ctx->card_format = CARDCALC_FMT_26BIT;
       if (strcmp(optarg, "CORP1000-48") EQUALS 0)
         ctx->card_format = CARDCALC_FMT_CORP1000_48;
       break;
@@ -357,7 +415,8 @@ int
       done = 1;
   };
 
-  fprintf(stdout, "cardcalc %s\n", VERSION_STRING_CARDCALC);
+  if (option != CARDCALC_OPT_HELP)
+  {
   if (ctx->verbosity > 3)
     fprintf(stderr, "card format: %d.\n", ctx->card_format);
   fprintf(stdout,
@@ -382,6 +441,7 @@ int
   };
 
   status = cardcalc_display_card(ctx, whole_binary_string);
+  };
 
   if (status != ST_OK)
     fprintf(stderr, "cardcalc exit, status %d\n", status);
