@@ -3,7 +3,7 @@
 
 #define EQUALS ==
 
-typedef struct cw_chuid
+typedef struct cw_fascn
 {
   int front_parity;
   int agency;
@@ -11,10 +11,10 @@ typedef struct cw_chuid
   long credential;
   long expiration;
   int rear_parity;
-} CW_CHUID;
+} CW_FASCN;
 
 
-int chuid_bits [1024];
+int fascn_bits [1024];
 int verbosity = 3;
 
 
@@ -88,8 +88,8 @@ void
 
 int
   unwind_piv_75bit
-    (char *chuid_75bit_hex,
-    CW_CHUID *chuid)
+    (char *fascn_75bit_hex,
+    CW_FASCN *fascn)
 
 {
 
@@ -98,54 +98,54 @@ int
 
 
   next_bit = 0;
-  memset(chuid, 0, sizeof(*chuid));
-  bytes_to_bits(chuid_75bit_hex, chuid_bits);
+  memset(fascn, 0, sizeof(*fascn));
+  bytes_to_bits(fascn_75bit_hex, fascn_bits);
   printf("Bits:\n");
   for(i=0; i<75; i++)
   {
-    printf(" %d", chuid_bits [i]);
+    printf(" %d", fascn_bits [i]);
     if (7 EQUALS (i%8))
       printf("\n");
   };
   printf("\n");
-  chuid->front_parity = chuid_bits [next_bit];
+  fascn->front_parity = fascn_bits [next_bit];
   next_bit++;
 
   for (i=0; i<14; i++)
   {
-    chuid->agency = chuid->agency << 1;
-    if (chuid_bits [next_bit + i])
-      chuid->agency = chuid->agency + 1;
+    fascn->agency = fascn->agency << 1;
+    if (fascn_bits [next_bit + i])
+      fascn->agency = fascn->agency + 1;
   };
   next_bit = next_bit + 14;
 
   for (i=0; i<14; i++)
   {
-    chuid->system = chuid->system << 1;
-    if (chuid_bits [next_bit + i])
-      chuid->system = chuid->system + 1;
+    fascn->system = fascn->system << 1;
+    if (fascn_bits [next_bit + i])
+      fascn->system = fascn->system + 1;
   };
   next_bit = next_bit + 14;
 
   for (i=0; i<20; i++)
   {
-    chuid->credential = chuid->credential << 1;
-    if (chuid_bits [next_bit + i])
-      chuid->credential = chuid->credential + 1;
+    fascn->credential = fascn->credential << 1;
+    if (fascn_bits [next_bit + i])
+      fascn->credential = fascn->credential + 1;
     if (verbosity > 3)
-      fprintf(stderr, "DEBUG: credential(%2d) %ld\n", i, chuid->credential);
+      fprintf(stderr, "DEBUG: credential(%2d) %ld\n", i, fascn->credential);
   };
   next_bit = next_bit + 20;
 
   for (i=0; i<25; i++)
   {
-    chuid->expiration = chuid->expiration << 1;
-    if (chuid_bits [next_bit + i])
-      chuid->expiration = chuid->expiration + 1;
+    fascn->expiration = fascn->expiration << 1;
+    if (fascn_bits [next_bit + i])
+      fascn->expiration = fascn->expiration + 1;
   };
   next_bit = next_bit + 25;
 
-  chuid->rear_parity = chuid_bits [next_bit];
+  fascn->rear_parity = fascn_bits [next_bit];
 
   return (0);
 
@@ -158,8 +158,8 @@ int
     char *argv [])
 
 {
-  CW_CHUID chuid;
-  char chuid_hex [1024];
+  CW_FASCN fascn;
+  char fascn_hex [1024];
   int i;
   int next;
 
@@ -172,47 +172,48 @@ int
   25 bits expiration yyyymmdd
   1 bit odd parity
 #endif
-  strcpy(chuid_hex, argv [1]);
-  printf("CHUID (hex): %s\n", chuid_hex);
-  (void)unwind_piv_75bit(chuid_hex, &chuid);
+  strcpy(fascn_hex, argv [1]);
+  printf("CHUID (hex): %s\n", fascn_hex);
+  (void)unwind_piv_75bit(fascn_hex, &fascn);
 
   printf("f Agency         System         Credential           Expiration                r\n");
   next = 0;
-  printf("%d", chuid_bits [0]);
+  printf("%d", fascn_bits [0]);
   printf(" ");
   next++;
 
   for (i=0; i<14; i++)
-    printf("%d", chuid_bits [next+i]);
+    printf("%d", fascn_bits [next+i]);
   printf(" ");
   next = next + 14;
 
   for (i=0; i<14; i++)
-    printf("%d", chuid_bits [next+i]);
+    printf("%d", fascn_bits [next+i]);
   printf(" ");
   next = next + 14;
 
   for (i=0; i<20; i++)
-    printf("%d", chuid_bits [next+i]);
+    printf("%d", fascn_bits [next+i]);
   printf(" ");
   next = next + 20;
 
   for (i=0; i<25; i++)
-    printf("%d", chuid_bits [next+i]);
+    printf("%d", fascn_bits [next+i]);
   printf(" ");
   next = next + 25;
 
-  printf("%d", chuid_bits [next]);
+  printf("%d", fascn_bits [next]);
 
   printf("\n");
 
-  printf("CHUID (75 bit format):\n");
-  printf("  Front Parity: %d\n", chuid.front_parity);
-  printf("  Agency: %d. (%04x)\n", chuid.agency, chuid.agency);
-  printf("  System: %d. (%04x)\n", chuid.system, chuid.system);
-  printf("  Credential: %ld. (%lx)\n", chuid.credential, chuid.credential);
-  printf("  Expiration: %ld. (%lx)\n", chuid.expiration, chuid.expiration);
-  printf("  Rear Parity: %d\n", chuid.rear_parity);
+  printf("FASC-N (75 bit format):\n");
+  printf("  RAW: %s\n", fascn_hex);
+  printf("  Front Parity: %d\n", fascn.front_parity);
+  printf("  Agency: %d. (%04x)\n", fascn.agency, fascn.agency);
+  printf("  System: %d. (%04x)\n", fascn.system, fascn.system);
+  printf("  Credential: %ld. (%lx)\n", fascn.credential, fascn.credential);
+  printf("  Expiration: %ld. (%lx)\n", fascn.expiration, fascn.expiration);
+  printf("  Rear Parity: %d\n", fascn.rear_parity);
   return(0);
 }
 

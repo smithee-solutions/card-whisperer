@@ -29,6 +29,7 @@ all:
 	(cd openbadger; make; cd ..)
 	(cd whoiscard; make; cd ..);
 	(cd credwrench; make; cd ..);
+	(cd pivdumper; make; cd ..);
 
 clean:
 	(cd libcardwhisper; make clean; cd ..)
@@ -36,6 +37,7 @@ clean:
 	(cd openbadger; make clean; cd ..)
 	(cd whoiscard; make clean; cd ..);
 	(cd credwrench; make clean; cd ..);
+	(cd pivdumper; make clean; cd ..);
 
 build:	all
 	(cd libcardwhisper; make build; cd ..)
@@ -43,4 +45,5 @@ build:	all
 	(cd openbadger; make build; cd ..)
 	(cd whoiscard; make build; cd ..)
 	(cd credwrench; make build; cd ..);
+	(cd pivdumper; make build; cd ..);
 
