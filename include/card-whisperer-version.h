@@ -1,7 +1,7 @@
 /*
   card-whisperer-version.h - version definitions for card-whisperer
 
-  (C)Copyright 2017-2019 Smithee Solutions LLC
+  (C)Copyright 2017-2020 Smithee Solutions LLC
 
   Licensed under the Apache License, Version 2.0 (the "License");
   you may not use this file except in compliance with the License.
@@ -16,7 +16,7 @@
   limitations under the License.
 */
 
-#define CSHH_VERSION_STRING "card-whisperer 0.50 Build 2"
+#define CSSH_VERSION_STRING "card-whisperer 1.00 Build 1"
 
 #define _DEFINED_CARD_WHISPERER_VERSION_H
 

@@ -275,10 +275,9 @@ int
 
 int
   tlv_tag_identify
-    (unsigned char
-      *ptr,
-    unsigned char
-      *current_tag)
+    (CSSH_CONFIG *cfg,
+    unsigned char *ptr,
+    unsigned char *current_tag)
 
 { /* tlv_tag_identify */
 
@@ -360,7 +359,7 @@ int
     status = ST_CSHH_KNOWN_TAG;
   };
   if (status != ST_CSHH_KNOWN_TAG)
-    fprintf (stderr, "Unknown tag: %02x\n", *ptr);
+    fprintf(cfg->log, "Unknown tag: %02x\n", *ptr);
   return (status);
 
 } /* tlv_tag_identify */

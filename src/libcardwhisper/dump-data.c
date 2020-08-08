@@ -43,16 +43,11 @@ unsigned char
 
 int
   cshh_card_getbuffer
-    (CSSH_CONFIG
-      *cfg,
-    BYTE
-      *command,
-    int
-      cmdlth,
-    BYTE
-      *outbuf,
-    int
-      *outlth)
+    (CSSH_CONFIG *cfg,
+    BYTE *command,
+    int cmdlth,
+    BYTE *outbuf,
+    int *outlth)
 
 { /* cshh_card_getbuffer */
 
@@ -362,12 +357,9 @@ int
 
 int
   dump_card_data
-    (CSSH_CONFIG
-      *cfg,
-    unsigned char
-      *chuid,
-    int
-      chuid_length)
+    (CSSH_CONFIG *cfg,
+    unsigned char *chuid,
+    int chuid_length)
 
 { /* dump_card_data */
 
@@ -401,7 +393,9 @@ int
   skip = 0;
   // always dump. if caller wanted it quiet they'd use the verbosity setting
 //  if (cfg->verbosity > 3)
-  dump_buffer (cfg, (BYTE *)chuid, total_length, 0);
+
+  if (cfg->analyze != 2)
+    dump_buffer (cfg, (BYTE *)chuid, total_length, 0);
 
   ptr = chuid;
   current_tag = *ptr;
@@ -410,7 +404,7 @@ int
     done = 1;
   while (!done)
   {
-    status = tlv_tag_identify (ptr, &current_tag);
+    status = tlv_tag_identify (cfg, ptr, &current_tag);
     if (status != ST_CSHH_KNOWN_TAG)
       done = 1;
     if (!done)
@@ -495,7 +489,7 @@ fprintf (stderr, "***FIXME*** Authn Key Map zero\n");
           int status_compress;
 
           cfg->final_object_length = current_length;
-          fprintf (stderr, "  Certificate:\n");
+          fprintf(cfg->log, "  Certificate:\n");
           dump_buffer (cfg, (BYTE *)(ptr+skip), current_length, 0);
 
           uclen = 32768; // sizeof (cfg->final_object)
@@ -529,11 +523,20 @@ fprintf (stderr, "decompress status %d\n", status_compress);
           fprintf (stderr, "  Expiration Date tag but no data\n");
         else
         {
-          int i;
-          fprintf (stderr, "  Expiration Date:");
-          for (i=0; i<current_length; i++)
-            fprintf (stderr, "%c", *(ptr+skip+i));
-          fprintf (stderr, "\n");
+          char expiry_date [1024];
+
+
+          memset(expiry_date, 0, sizeof(expiry_date));
+          memcpy(expiry_date, ptr+skip, current_length);
+
+          if (cfg->analyze EQUALS 2)
+          {
+            fprintf(cfg->results, "\"field73-expiry\":\"%s\",\n", expiry_date);
+          };
+          if (cfg->analyze != 2)
+          {
+            fprintf(cfg->log, "  Expiration Date: %s\n", expiry_date);
+          };
         };
         ptr = ptr + skip + current_length;
         break;
@@ -553,17 +556,23 @@ fprintf (stderr, "decompress status %d\n", status_compress);
       case TAG_FASC_N:
         status = get_tlv_length (cfg, ptr, &current_length, &skip);
         if (current_length < 1)
-          fprintf (stderr, "  FASC-N tag but no data\n");
+          fprintf(cfg->log, "  FASC-N tag but no data\n");
         else
         {
           int i;
-          fprintf (stderr, "  FASC-N:");
+          char fasc_n_hex [2048];
+
+
           for (i=0; i<current_length; i++)
           {
             fasc_n_buffer [i] = *(ptr+skip+i);
-            fprintf (stderr, " %02x", *(ptr+skip+i));
-          }
-          fprintf (stderr, "\n");
+            sprintf(fasc_n_hex + (2*i), "%02x", fasc_n_buffer [i]);
+          };
+          fprintf(cfg->log, "  FASC-N: %s\n", fasc_n_hex);
+          if (cfg->analyze EQUALS 2)
+          {
+            fprintf(cfg->results, "\"field73-fasc-n\":\"%s\",\n", fasc_n_hex);
+          };
         };
         ptr = ptr + skip + current_length;
         break;

@@ -30,6 +30,12 @@ build:	all
 	mkdir -p ${BUILD_DIR}/bin
 	cp ${PROGS} ${BUILD_DIR}/bin
 
+diagxxxx:	diagxxxx.o
+	${LINK} -o diagxxxx -g diagxxxx.o -lpcsclite -lz ${LDFLAGS}
+
+diagxxxx.o:	diagxxxx.c
+	clang ${CFLAGS} diagxxxx.c
+
 lscard:	lscard.o ${BUILD_DIR}/lib/libcardwhisper.a Makefile
 	clang -o lscard -g lscard.o \
 	  -lpcsclite -lz ${LDFLAGS}

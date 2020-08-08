@@ -164,7 +164,7 @@ int
 
 
   status = ST_OK;
-  printf ("write-chuid.  Part of %s\n", CSHH_VERSION_STRING);
+  printf ("write-chuid.  Part of %s\n", CSSH_VERSION_STRING);
   memset (cfg, 0, sizeof (*cfg));
   memset (chuid_item_list, 0, sizeof (chuid_item_list));
   memset (&fasc_n_to_write, 0, sizeof (fasc_n_to_write));

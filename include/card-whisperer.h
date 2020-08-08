@@ -135,10 +135,14 @@
 
 typedef struct cssh_config
 {
+  int verbosity;
+  FILE *log;
+
+  int analyze;
+  FILE *results;
+
   int action;
   int use_pin;
-  int analyze;
-  int verbosity;
   FILE *current_file;
   char reader_name [1024];
   int reader_index;
@@ -154,7 +158,6 @@ typedef struct cssh_config
   unsigned char historical_bytes [258];
   int historical_count;
 } CSSH_CONFIG;
-#define CSHH_CONFIG CSSH_CONFIG
 
 // CHUID stomper
 
@@ -306,7 +309,7 @@ int
       inLen);
 int
   display_atr
-    (CSHH_CONFIG *cfg,
+    (CSSH_CONFIG *cfg,
     unsigned char *buffer,
     int lth);
 void
@@ -341,7 +344,7 @@ int
       *ctx);
 int
   interpret_historical
-    (CSHH_CONFIG *ctx,
+    (CSSH_CONFIG *ctx,
     unsigned char *buffer,
     int count);
 int
@@ -369,8 +372,7 @@ int init_command_line
     unsigned short *action_mask);
 int
   tlv_tag_identify
-    (unsigned char
-      *ptr,
-    unsigned char
-      *current_tag);
+    (CSSH_CONFIG *cfg,
+    unsigned char *ptr,
+    unsigned char *current_tag);
 
