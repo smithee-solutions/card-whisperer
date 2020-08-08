@@ -100,7 +100,7 @@ int
   options.io_enable = 1; // default is PCSC enabled
   options.message_size = 32; // default, as if SHA-256
   options.key_size = 2048/8; // default, as if RSA-2048
-  fprintf (stderr, "credwrench (%s)\n", CSHH_VERSION_STRING);
+  fprintf (stderr, "credwrench (%s)\n", CSSH_VERSION_STRING);
 
 strcpy(message, "----CONFORMANCE---");
 

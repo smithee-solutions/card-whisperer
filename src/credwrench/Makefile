@@ -19,7 +19,7 @@ CC=clang
 LINK=clang
 BUILD_DIR=../../opt/tester
 CFLAGS=-c -g -I../../include -I/usr/include/PCSC -I/opt/tester/include -Wall -Werror
-LDFLAGS=-g -L${BUILD_DIR}/lib -L/opt/tester/lib -lcardwhisper -ldl
+LDFLAGS=-g -L${BUILD_DIR}/lib -L/opt/tester/lib -lcardwhisper -ldl -lpthread
 
 all:	${PROGS}
 

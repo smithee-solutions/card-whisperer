@@ -312,7 +312,7 @@ int
   int status;
 
 
-  fprintf(stderr, "create-OES-contents (part of %s)\n", CSHH_VERSION_STRING);
+  fprintf(stderr, "create-OES-contents (part of %s)\n", CSSH_VERSION_STRING);
   strcpy (parameter_filename, "openbadger.json");
   if (argc > 1)
     strcpy (parameter_filename, argv [1]);

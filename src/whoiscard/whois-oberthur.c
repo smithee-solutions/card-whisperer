@@ -14,7 +14,7 @@
 
 int
   interpret_historical
-    (CSHH_CONFIG *ctx,
+    (CSSH_CONFIG *ctx,
     unsigned char *buffer,
     int count)
 

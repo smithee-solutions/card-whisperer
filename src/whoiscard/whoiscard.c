@@ -36,7 +36,7 @@
 #include <card-whisperer.h>
 int
   try_command
-    (CSHH_CONFIG *ctx,
+    (CSSH_CONFIG *ctx,
     unsigned char *command,
     int command_length,
     unsigned char *response,
@@ -71,7 +71,7 @@ int
   // basic initialization
 
   status = ST_OK;
-  fprintf (stderr, "whoiscard (%s)\n", CSHH_VERSION_STRING);
+  fprintf (stderr, "whoiscard (%s)\n", CSSH_VERSION_STRING);
   ctx = &card_whisperer_context;
   memset (ctx, 0, sizeof (*ctx));
   ctx->verbosity = 3;
@@ -271,7 +271,7 @@ int
 
 int
   try_command
-    (CSHH_CONFIG *ctx,
+    (CSSH_CONFIG *ctx,
     unsigned char *command,
     int command_length,
     unsigned char *response,
