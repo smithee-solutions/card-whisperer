@@ -575,7 +575,7 @@ int
       case CSHH_CHUID_ITEM_GUID:
         tlv_buffer [0] = TAG_GUID;
 fprintf (stderr, "sl %d s %s\n",
-  strlen ((char *)(chuid_item_list [i].string_value)),
+  (int)strlen ((char *)(chuid_item_list [i].string_value)),
   chuid_item_list [i].string_value);
         tlv_buffer [1] = 0xff & (strlen ((char *)(chuid_item_list [i].string_value)))/2;
 fprintf (stderr, "tlv %2x %2x %2x %2x\n",
